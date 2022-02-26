@@ -55,9 +55,6 @@ async function onMessageHandler (channel, userstate, message, self) {
     const commandName = message.trim();
 
     switch (commandName) {
-        case "!bla":
-            db.savePlayers(players);
-            break;
         case "!commands":
             announce_str = "The commands are: "
             for (let command in commands) {
@@ -65,10 +62,10 @@ async function onMessageHandler (channel, userstate, message, self) {
             }
             client.say(channel, announce_str);
             break;
-        case "!blah":
+        case "!register":
             // register player...  rename?
             players[uName] = new player(uName)
-            // db.registerPlayer(uName);
+            db.registerPlayer(uName);
             playerInventory[uName] = {};
             player_status[uName] = {action: 'Nothing', time: 0};
             break;
