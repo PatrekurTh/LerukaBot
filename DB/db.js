@@ -84,24 +84,24 @@ const updatePlayer = (player, inventory) => {
     })().catch(e => console.error(e.stack))
 }
 
-// function registerPlayer(player) {
-//     ;(async () => {
-//         // note: we don't try/catch this because if connecting throws an exception
-//         // we don't need to dispose of the client (it will be undefined)
-//         const client = await pool.connect()
-//         try {
-//             await client.query('BEGIN')
-//             const queryText = 'INSERT INTO players(name) VALUES($1) RETURNING *'
-//             const res = await client.query(queryText, [player])
-//             await client.query('COMMIT')
-//         } catch (e) {
-//             await client.query('ROLLBACK')
-//             throw e
-//         } finally {
-//             client.release()
-//         }
-//     })().catch(e => console.error(e.stack))
-// }
+function registerPlayer(player) {
+    ;(async () => {
+        // note: we don't try/catch this because if connecting throws an exception
+        // we don't need to dispose of the client (it will be undefined)
+        const client = await pool.connect()
+        try {
+            await client.query('BEGIN')
+            const queryText = 'INSERT INTO players(name) VALUES($1) RETURNING *'
+            const res = await client.query(queryText, [player])
+            await client.query('COMMIT')
+        } catch (e) {
+            await client.query('ROLLBACK')
+            throw e
+        } finally {
+            client.release()
+        }
+    })().catch(e => console.error(e.stack))
+}
 
 const savePlayers = (players) => {
     console.log('running');
@@ -131,4 +131,4 @@ const savePlayers = (players) => {
 
 // saveInventory
 
-module.exports = { availableFish, levels , updatePlayer , getPlayers , addToInventory , savePlayers } //registerPlayer
+module.exports = { availableFish, levels , updatePlayer , getPlayers , addToInventory , savePlayers , registerPlayer }
