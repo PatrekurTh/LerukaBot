@@ -37,21 +37,23 @@ const players = {};
 let start_time;
 let tick;
 
-function player(name) {
-  this.name = name;
-  this.attackl = 1;
-  this.defencel = 1;
-  this.fishingl = 1;
-  this.miningl = 1;
-  this.attackxp = 0;
-  this.defencexp = 0;
-  this.fishingxp = 0;
-  this.miningxp = 0;
+class player {
+  constructor(name) {
+    this.name = name;
+    this.attackl = 1;
+    this.defencel = 1;
+    this.fishingl = 1;
+    this.miningl = 1;
+    this.attackxp = 0;
+    this.defencexp = 0;
+    this.fishingxp = 0;
+    this.miningxp = 0;
+  }
 }
 // function sem sækir top 10 úr players fyrir hvert skill xp
 
 // Called every time a message comes in
-async function onMessageHandler(channel, userstate, message, self) {
+const onMessageHandler = async (channel, userstate, message, self) => {
   if (self) {
     return;
   } // Ignore messages from the bot
@@ -137,10 +139,10 @@ async function onMessageHandler(channel, userstate, message, self) {
       client.say(channel, `${uName} CHAMP`);
       break;
   }
-}
+};
 
 // generalize for professions
-function gathering(name, drops) {
+const gathering = (name, drops) => {
   console.log("running");
   const roll = Math.random();
   for (let i = 0, j = drops.length; i < j; i++) {
@@ -153,7 +155,7 @@ function gathering(name, drops) {
       break;
     }
   }
-}
+};
 
 const refreshPlayerList = async () => {
   const tmpPlayers = await getPlayers();
@@ -180,10 +182,10 @@ const startUp = async () => {
 };
 
 // Called every time the bot connects to Twitch chat
-function onConnectedHandler(addr, port) {
+const onConnectedHandler = (addr, port) => {
   console.log(`* Connected to ${addr}:${port}`);
   startUp();
-}
+};
 
 const playerIsRegistered = (uname, channel) => {
   if (!(uname in players)) {

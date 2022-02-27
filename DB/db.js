@@ -9,13 +9,13 @@ const pool = new Pool({
   database: process.env.PGDATABASE,
 });
 
-export async function availableFish(fLevel) {
-  const y = await pool.query(
+const availableFish = async (fLevel) => {
+  const qRes = await pool.query(
     "SELECT * FROM fish WHERE flevel <= $1 ORDER BY cpercent",
     [fLevel]
   );
-  return y.rows;
-}
+  return qRes.rows;
+};
 
 // vantar ores table
 // async function availableOres(mLevel) {
@@ -23,9 +23,9 @@ export async function availableFish(fLevel) {
 //     return y.rows;
 // }
 
-export async function levels(skillxp) {
+const levels = async (skillxp) => {
   const temp = {};
-  for (let skill in skillxp) {
+  skillxp.foreach((skill) => {
     // temp[skill]
     temp[skill] = (
       await pool.query("SELECT MAX(level) FROM xp WHERE xpneed <= $1", [
@@ -33,16 +33,16 @@ export async function levels(skillxp) {
       ])
     ).rows[0].max;
     // console.log(x);
-  }
+  });
   return temp;
-}
+};
 
-export const getPlayers = async () => {
+const getPlayers = async () => {
   const players = await pool.query("SELECT * FROM players");
   return players.rows;
 };
 
-export const addToInventory = (playerName, item) => {
+const addToInventory = (playerName, item) => {
   (async () => {
     // note: we don't try/catch this because if connecting throws an exception
     // we don't need to dispose of the client (it will be undefined)
@@ -66,7 +66,7 @@ export const addToInventory = (playerName, item) => {
   })().catch((e) => console.error(e.stack));
 };
 
-export const updatePlayer = (player, inventory) => {
+const updatePlayer = (player, inventory) => {
   (async () => {
     // note: we don't try/catch this because if connecting throws an exception
     // we don't need to dispose of the client (it will be undefined)
@@ -102,7 +102,7 @@ export const updatePlayer = (player, inventory) => {
   })().catch((e) => console.error(e.stack));
 };
 
-export const registerPlayer = (player) => {
+const registerPlayer = (player) => {
   (async () => {
     // note: we don't try/catch this because if connecting throws an exception
     // we don't need to dispose of the client (it will be undefined)
@@ -122,7 +122,7 @@ export const registerPlayer = (player) => {
   })().catch((e) => console.error(e.stack));
 };
 
-export const savePlayers = (players) => {
+const savePlayers = (players) => {
   console.log("running");
   const playersArr = [];
   for (let player in players) {
@@ -149,3 +149,13 @@ export const savePlayers = (players) => {
 };
 
 // saveInventory
+
+export {
+  availableFish,
+  levels,
+  getPlayers,
+  addToInventory,
+  updatePlayer,
+  registerPlayer,
+  savePlayers,
+};
