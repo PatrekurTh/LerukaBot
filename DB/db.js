@@ -102,14 +102,15 @@ export const updatePlayer = (player, inventory) => {
   })().catch((e) => console.error(e.stack));
 };
 
-export function registerPlayer(player) {
+export const registerPlayer = (player) => {
   (async () => {
     // note: we don't try/catch this because if connecting throws an exception
     // we don't need to dispose of the client (it will be undefined)
     const client = await pool.connect();
     try {
       await client.query("BEGIN");
-      const queryText = "INSERT INTO players(name) VALUES($1) RETURNING *";
+      const queryText =
+        "INSERT INTO players(name) VALUES($1) ON CONFLICT DO NOTHING RETURNING *";
       const res = await client.query(queryText, [player]);
       await client.query("COMMIT");
     } catch (e) {
@@ -119,7 +120,7 @@ export function registerPlayer(player) {
       client.release();
     }
   })().catch((e) => console.error(e.stack));
-}
+};
 
 export const savePlayers = (players) => {
   console.log("running");
