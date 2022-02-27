@@ -5,6 +5,7 @@ import {
   availableFish,
   addToInventory,
   savePlayers,
+  getPlayers,
 } from "./DB/db.js";
 
 // Define configuration options
@@ -61,20 +62,29 @@ async function onMessageHandler(channel, userstate, message, self) {
 
   switch (commandName) {
     case "!commands":
-      announce_str = "The commands are: ";
-      for (let command in commands) {
-        announce_str += `${commands[command]} `;
-      }
+      let announce_str = "The commands are: ";
+      commands.forEach((command) => (announce_str += `${command} `));
       client.say(channel, announce_str);
       break;
     case "!register":
-      // register player...  rename?
+      if (playerIsRegistered(uName, channel)) {
+        client.say(
+          channel,
+          `${uName} is already registered, use !commands to see what you can do!`
+        );
+        return;
+      }
       players[uName] = new player(uName);
       registerPlayer(uName);
       playerInventory[uName] = {};
       player_status[uName] = { action: "Nothing", time: 0 };
+      client.say(
+        channel,
+        `Welcome ${uName}, use !commands to see what you can do!`
+      );
       break;
     case "!fish":
+      if (!playerIsRegistered(uName, channel)) return;
       if (player_status[uName].action !== "Fishing") {
         const loot_table = await availableFish(players[uName].fishingl);
         start_time = new Date().getTime();
@@ -92,6 +102,7 @@ async function onMessageHandler(channel, userstate, message, self) {
     case "!mine":
       // missing ores table
       // const loot_table = await availableOres(players[uName].levels.mining);
+      if (!playerIsRegistered(uName, channel)) return;
       start_time = new Date().getTime();
       player_status[uName].action = "Mining";
       player_status[uName].time = start_time;
@@ -103,11 +114,13 @@ async function onMessageHandler(channel, userstate, message, self) {
       }, gatheringTick);
       break;
     case "!stats":
+      if (!playerIsRegistered(uName, channel)) return;
       refreshPlayerList();
       const stat_str = `[Attack: ${players[uName].attackl}] [Defence: ${players[uName].defencel}] [Fishing: ${players[uName].fishingl}] [Mining: ${players[uName].miningl}]`;
       client.say(channel, stat_str);
       break;
     case "!status":
+      if (!playerIsRegistered(uName, channel)) return;
       const now_time = new Date().getTime();
       client.say(
         channel,
@@ -117,10 +130,11 @@ async function onMessageHandler(channel, userstate, message, self) {
       );
       break;
     case "!bag":
+      if (!playerIsRegistered(uName, channel)) return;
       console.log(playerInventory[uName]);
       break;
-    default:
-      console.log("* Not a command");
+    case "POG":
+      client.say(channel, `${uName} CHAMP`);
       break;
   }
 }
@@ -141,12 +155,12 @@ function gathering(name, drops) {
   }
 }
 
-// const refreshPlayerList = async () => {
-//     const tmpPlayers = await db.getPlayers()
-//     tmpPlayers.forEach(v => {
-//         players[v.name] = v
-//     })
-// }
+const refreshPlayerList = async () => {
+  const tmpPlayers = await getPlayers();
+  tmpPlayers.forEach((v) => {
+    players[v.name] = v;
+  });
+};
 
 const populatePlayerStates = () => {
   for (let key in players) {
@@ -168,5 +182,14 @@ const startUp = async () => {
 // Called every time the bot connects to Twitch chat
 function onConnectedHandler(addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
-  // startUp();
+  startUp();
 }
+
+const playerIsRegistered = (uname, channel) => {
+  if (!(uname in players)) {
+    console.log("inside func");
+    client.say(channel, "Please use !register to register");
+    return false;
+  }
+  return true;
+};
